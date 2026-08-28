@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "BetLedger",
+    "slug": "betledger",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#030712"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.betledger.app"
+    },
+    "android": {
+      "package": "com.betledger.app"
+    }
+  }
+}

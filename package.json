@@ -1,0 +1,14 @@
+{
+  "name": "betledger",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "web": "npm run dev -w packages/web",
+    "mobile": "npm run start -w packages/mobile",
+    "build:shared": "npm run build -w packages/shared",
+    "build:web": "npm run build -w packages/web",
+    "lint": "npm run lint -w packages/web"
+  }
+}
