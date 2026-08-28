@@ -9,6 +9,7 @@
     "mobile": "npm run start -w packages/mobile",
     "build:shared": "npm run build -w packages/shared",
     "build:web": "npm run build -w packages/web",
-    "lint": "npm run lint -w packages/web"
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
   }
 }

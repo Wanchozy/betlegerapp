@@ -1,24 +1,9 @@
 import { useEffect, useState } from 'react'
-import { DashboardData, Bet, computePNL, filterBetsByDateRange, getWeekRange, getMonthRange, getYearRange } from '@betledger/shared'
+import { Bet, buildDashboardData, getCurrentUserId } from '@betledger/shared'
 import { Dashboard } from '../components/Dashboard'
 import { fetchBets, deleteBet } from '../api/bets'
 
-const DEMO_USER_ID = 'demo-user'
-
-function buildDashboard(bets: Bet[]): DashboardData {
-  const now = new Date()
-  const weekRange = getWeekRange(now)
-  const monthRange = getMonthRange(now)
-  const yearRange = getYearRange(now)
-
-  return {
-    week: computePNL(filterBetsByDateRange(bets, weekRange.start, weekRange.end)),
-    month: computePNL(filterBetsByDateRange(bets, monthRange.start, monthRange.end)),
-    year: computePNL(filterBetsByDateRange(bets, yearRange.start, yearRange.end)),
-    all_time: computePNL(bets),
-    recent_bets: bets.slice(0, 10),
-  }
-}
+const userId = getCurrentUserId()
 
 export function DashboardPage() {
   const [bets, setBets] = useState<Bet[]>([])
@@ -32,7 +17,7 @@ export function DashboardPage() {
   async function loadBets() {
     try {
       setLoading(true)
-      const data = await fetchBets(DEMO_USER_ID)
+      const data = await fetchBets(userId)
       setBets(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load bets')
@@ -62,5 +47,5 @@ export function DashboardPage() {
     )
   }
 
-  return <Dashboard data={buildDashboard(bets)} onDeleteBet={handleDelete} />
+  return <Dashboard data={buildDashboardData(bets)} onDeleteBet={handleDelete} />
 }

@@ -1,19 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Bet, computePNL, filterBetsByDateRange, getWeekRange, getMonthRange, getYearRange, PNLSummary } from '@betledger/shared'
+import { Bet, aggregateByField, buildPeriodSummaries, getCurrentUserId } from '@betledger/shared'
 import { PNLSummary as PNLSummaryCard } from '../components/PNLSummary'
 import { fetchBets } from '../api/bets'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
 
-const DEMO_USER_ID = 'demo-user'
-
-const periods = [
-  { key: 'week', label: 'This Week', getRange: getWeekRange },
-  { key: 'month', label: 'This Month', getRange: getMonthRange },
-  { key: 'year', label: 'This Year', getRange: getYearRange },
-  { key: 'all', label: 'All Time', getRange: () => ({ start: new Date(0), end: new Date() }) },
-]
+const userId = getCurrentUserId()
 
 export function ReportsPage() {
   const [bets, setBets] = useState<Bet[]>([])
@@ -21,19 +14,13 @@ export function ReportsPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchBets(DEMO_USER_ID)
+    fetchBets(userId)
       .then(setBets)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
   }, [])
 
-  const summaries: { label: string; summary: PNLSummary }[] = periods.map((p) => {
-    const { start, end } = p.getRange(new Date())
-    return {
-      label: p.label,
-      summary: computePNL(filterBetsByDateRange(bets, start, end)),
-    }
-  })
+  const summaries = buildPeriodSummaries(bets)
 
   const chartData = summaries.map((s) => ({
     period: s.label,
@@ -51,7 +38,7 @@ export function ReportsPage() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {summaries.map((s) => (
-          <PNLSummaryCard key={s.label} summary={s.summary} title={s.label} />
+          <PNLSummaryCard key={s.key} summary={s.summary} title={s.label} />
         ))}
       </div>
 
@@ -77,20 +64,6 @@ export function ReportsPage() {
       </div>
     </div>
   )
-}
-
-function aggregateByField(bets: Bet[], field: 'sport' | 'bet_type') {
-  const map = new Map<string, { count: number; profit: number }>()
-  for (const b of bets) {
-    const key = b[field]
-    const entry = map.get(key) ?? { count: 0, profit: 0 }
-    entry.count++
-    entry.profit += b.profit_loss
-    map.set(key, entry)
-  }
-  return Array.from(map.entries())
-    .map(([label, stats]) => ({ label, ...stats }))
-    .sort((a, b) => b.profit - a.profit)
 }
 
 function BreakdownCard({

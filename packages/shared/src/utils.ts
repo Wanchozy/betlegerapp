@@ -1,10 +1,25 @@
-import { Bet, PNLSummary } from './types'
+import { Bet, BetOutcome, PNLSummary } from './types'
 
+/**
+ * Profit for a *winning* bet, given American odds.
+ */
 export function calculateProfitLoss(odds: number, stake: number): number {
   if (odds > 0) {
     return stake * (odds / 100)
   }
   return stake * (100 / Math.abs(odds))
+}
+
+/**
+ * Derives the profit/loss for a bet based on its outcome. This is the single
+ * place that decides how `profit_loss` is computed, so it can be unit tested
+ * and reused by every data-access layer (web, mobile, future admin tools)
+ * instead of being recalculated ad-hoc in each package.
+ */
+export function deriveProfitLoss(outcome: BetOutcome, odds: number, stake: number): number {
+  if (outcome === 'win') return calculateProfitLoss(odds, stake)
+  if (outcome === 'loss') return -stake
+  return 0
 }
 
 export function computePNL(bets: Bet[]): PNLSummary {

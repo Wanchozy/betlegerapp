@@ -1,25 +1,11 @@
 import { useEffect, useState } from 'react'
 import { View, Text, ScrollView, ActivityIndicator, StyleSheet } from 'react-native'
-import { Bet, computePNL, filterBetsByDateRange, getWeekRange, getMonthRange, getYearRange, DashboardData } from '@betledger/shared'
+import { Bet, buildDashboardData, getCurrentUserId } from '@betledger/shared'
 import { PNLSummaryCard } from '../components/PNLSummaryCard'
 import { BetList } from '../components/BetList'
 import { fetchBets, deleteBet } from '../api/bets'
 
-const DEMO_USER_ID = 'demo-user'
-
-function buildDashboard(bets: Bet[]): DashboardData {
-  const now = new Date()
-  const week = getWeekRange(now)
-  const month = getMonthRange(now)
-  const year = getYearRange(now)
-  return {
-    week: computePNL(filterBetsByDateRange(bets, week.start, week.end)),
-    month: computePNL(filterBetsByDateRange(bets, month.start, month.end)),
-    year: computePNL(filterBetsByDateRange(bets, year.start, year.end)),
-    all_time: computePNL(bets),
-    recent_bets: bets.slice(0, 10),
-  }
-}
+const userId = getCurrentUserId()
 
 export function DashboardScreen() {
   const [bets, setBets] = useState<Bet[]>([])
@@ -27,7 +13,7 @@ export function DashboardScreen() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchBets(DEMO_USER_ID)
+    fetchBets(userId)
       .then(setBets)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
@@ -45,7 +31,7 @@ export function DashboardScreen() {
   if (loading) return <ActivityIndicator color="#10b981" style={{ marginTop: 40 }} />
   if (error) return <Text style={styles.error}>{error}</Text>
 
-  const data = buildDashboard(bets)
+  const data = buildDashboardData(bets)
 
   return (
     <ScrollView style={styles.container}>

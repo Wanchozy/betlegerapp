@@ -1,17 +1,10 @@
 import { useEffect, useState } from 'react'
 import { View, Text, ScrollView, ActivityIndicator, StyleSheet } from 'react-native'
-import { Bet, PNLSummary, computePNL, filterBetsByDateRange, getWeekRange, getMonthRange, getYearRange } from '@betledger/shared'
+import { Bet, aggregateByField, buildPeriodSummaries, getCurrentUserId } from '@betledger/shared'
 import { PNLSummaryCard } from '../components/PNLSummaryCard'
 import { fetchBets } from '../api/bets'
 
-const DEMO_USER_ID = 'demo-user'
-
-const periods = [
-  { key: 'week', label: 'This Week', getRange: getWeekRange },
-  { key: 'month', label: 'This Month', getRange: getMonthRange },
-  { key: 'year', label: 'This Year', getRange: getYearRange },
-  { key: 'all', label: 'All Time', getRange: () => ({ start: new Date(0), end: new Date() }) },
-]
+const userId = getCurrentUserId()
 
 export function ReportsScreen() {
   const [bets, setBets] = useState<Bet[]>([])
@@ -19,7 +12,7 @@ export function ReportsScreen() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchBets(DEMO_USER_ID)
+    fetchBets(userId)
       .then(setBets)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
@@ -28,19 +21,16 @@ export function ReportsScreen() {
   if (loading) return <ActivityIndicator color="#10b981" style={{ marginTop: 40 }} />
   if (error) return <Text style={styles.error}>{error}</Text>
 
-  const summaries: { label: string; summary: PNLSummary }[] = periods.map((p) => {
-    const { start, end } = p.getRange(new Date())
-    return { label: p.label, summary: computePNL(filterBetsByDateRange(bets, start, end)) }
-  })
+  const summaries = buildPeriodSummaries(bets)
 
-  const bySport = aggregate(bets, 'sport')
-  const byType = aggregate(bets, 'bet_type')
+  const bySport = aggregateByField(bets, 'sport')
+  const byType = aggregateByField(bets, 'bet_type')
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.gap}>
         {summaries.map((s) => (
-          <PNLSummaryCard key={s.label} summary={s.summary} title={s.label} />
+          <PNLSummaryCard key={s.key} summary={s.summary} title={s.label} />
         ))}
 
         <View style={styles.breakdown}>
@@ -69,20 +59,6 @@ export function ReportsScreen() {
       </View>
     </ScrollView>
   )
-}
-
-function aggregate(bets: Bet[], field: 'sport' | 'bet_type') {
-  const map = new Map<string, { count: number; profit: number }>()
-  for (const b of bets) {
-    const key = b[field]
-    const entry = map.get(key) ?? { count: 0, profit: 0 }
-    entry.count++
-    entry.profit += b.profit_loss
-    map.set(key, entry)
-  }
-  return Array.from(map.entries())
-    .map(([label, stats]) => ({ label, ...stats }))
-    .sort((a, b) => b.profit - a.profit)
 }
 
 const styles = StyleSheet.create({

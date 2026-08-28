@@ -1,50 +1,9 @@
-import { getSupabase, Bet, BetFormData } from '@betledger/shared'
+import { createBetsRepository } from '@betledger/shared'
 
-export async function fetchBets(userId: string): Promise<Bet[]> {
-  const supabase = getSupabase()
-  const { data, error } = await supabase
-    .from('bets')
-    .select('*')
-    .eq('user_id', userId)
-    .order('placed_at', { ascending: false })
+// Composition root: wires the shared, DI-friendly repository up to the
+// real Supabase client for this app. All the actual query/business logic
+// lives in @betledger/shared so it's shared with mobile and unit tested
+// once instead of per-platform.
+const betsApi = createBetsRepository()
 
-  if (error) throw error
-  return data ?? []
-}
-
-export async function createBet(
-  userId: string,
-  form: BetFormData
-): Promise<Bet> {
-  const supabase = getSupabase()
-  const { data, error } = await supabase
-    .from('bets')
-    .insert({ ...form, user_id: userId, profit_loss: 0 })
-    .select()
-    .single()
-
-  if (error) throw error
-  return data
-}
-
-export async function updateBet(
-  id: string,
-  form: Partial<BetFormData>
-): Promise<Bet> {
-  const supabase = getSupabase()
-  const { data, error } = await supabase
-    .from('bets')
-    .update(form)
-    .eq('id', id)
-    .select()
-    .single()
-
-  if (error) throw error
-  return data
-}
-
-export async function deleteBet(id: string): Promise<void> {
-  const supabase = getSupabase()
-  const { error } = await supabase.from('bets').delete().eq('id', id)
-  if (error) throw error
-}
+export const { fetchBets, createBet, updateBet, deleteBet } = betsApi

@@ -1,3 +1,7 @@
 export * from './types'
 export * from './utils'
+export * from './dashboard'
+export * from './reports'
+export * from './auth'
+export * from './api/bets'
 export { getSupabase } from './supabase'

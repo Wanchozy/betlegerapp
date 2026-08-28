@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Bet, BetFormData } from '@betledger/shared'
+import { Bet, BetFormData, getCurrentUserId } from '@betledger/shared'
 import { BetForm } from '../components/BetForm'
 import { BetList } from '../components/BetList'
 import { fetchBets, createBet, deleteBet } from '../api/bets'
 
-const DEMO_USER_ID = 'demo-user'
+const userId = getCurrentUserId()
 
 export function BetsPage() {
   const [bets, setBets] = useState<Bet[]>([])
@@ -18,7 +18,7 @@ export function BetsPage() {
   async function loadBets() {
     try {
       setLoading(true)
-      const data = await fetchBets(DEMO_USER_ID)
+      const data = await fetchBets(userId)
       setBets(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load bets')
@@ -29,7 +29,7 @@ export function BetsPage() {
 
   async function handleCreate(form: BetFormData) {
     try {
-      const bet = await createBet(DEMO_USER_ID, form)
+      const bet = await createBet(userId, form)
       setBets((prev) => [bet, ...prev])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create bet')

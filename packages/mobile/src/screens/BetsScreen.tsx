@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react'
 import {
   View, Text, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Alert, StyleSheet,
 } from 'react-native'
-import { Bet, BetFormData } from '@betledger/shared'
+import { Bet, BetFormData, getCurrentUserId } from '@betledger/shared'
 import { BetList } from '../components/BetList'
 import { fetchBets, createBet, deleteBet } from '../api/bets'
 
-const DEMO_USER_ID = 'demo-user'
+const userId = getCurrentUserId()
 
 const outcomeBtns = [
   { key: 'pending' as const, label: 'Pending', color: '#6b7280' },
@@ -33,7 +33,7 @@ export function BetsScreen() {
   })
 
   useEffect(() => {
-    fetchBets(DEMO_USER_ID)
+    fetchBets(userId)
       .then(setBets)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
@@ -45,7 +45,7 @@ export function BetsScreen() {
       return
     }
     try {
-      const bet = await createBet(DEMO_USER_ID, form)
+      const bet = await createBet(userId, form)
       setBets((prev) => [bet, ...prev])
       setShowForm(false)
       setForm({
