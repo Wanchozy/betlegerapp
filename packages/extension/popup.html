@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>BetLedger Capture</title>
+  </head>
+  <body>
+    <main>
+      <h1>BetLedger Capture</h1>
+      <p id="status">Checking status…</p>
+      <p>Bets synced: <strong id="count">0</strong></p>
+
+      <section>
+        <h2>Debug log</h2>
+        <p class="hint">
+          Site adapters aren't finished yet, so every bet-related request seen
+          on a supported page is logged here (URL, method, and body only - no
+          auth headers or cookies are ever captured). Place a bet, then copy
+          the log below and share it so the real adapter can be finished.
+        </p>
+        <div class="actions">
+          <button id="copy">Copy log</button>
+          <button id="clear">Clear log</button>
+        </div>
+        <ul id="log"></ul>
+      </section>
+    </main>
+    <script type="module" src="./src/popup.ts"></script>
+  </body>
+</html>

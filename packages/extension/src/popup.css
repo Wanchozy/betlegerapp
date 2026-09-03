@@ -1,0 +1,75 @@
+:root {
+  color-scheme: light;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  width: 320px;
+  background: #faf7f0;
+  color: #1f2a24;
+}
+
+main {
+  padding: 16px;
+}
+
+h1 {
+  font-size: 15px;
+  margin: 0 0 8px;
+}
+
+h2 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #5c6b63;
+  margin: 16px 0 4px;
+}
+
+#status {
+  font-size: 13px;
+  margin: 0 0 4px;
+}
+
+.hint {
+  font-size: 12px;
+  color: #5c6b63;
+  line-height: 1.4;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+button {
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #1d4d3e;
+  background: #1d4d3e;
+  color: #faf7f0;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+#log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 180px;
+  overflow-y: auto;
+  border-top: 1px solid #e5ddcc;
+}
+
+#log li {
+  font-size: 11px;
+  padding: 6px 0;
+  border-bottom: 1px solid #e5ddcc;
+  word-break: break-all;
+}

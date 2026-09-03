@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "BetLedger Capture",
+  "version": "0.1.0",
+  "description": "Captures bets placed on supported sportsbooks and syncs them to your BetLedger account.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "BetLedger Capture"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["storage"],
+  "host_permissions": ["https://*.sportybet.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://*.sportybet.com/*"],
+      "js": ["inject.js"],
+      "world": "MAIN",
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["https://*.sportybet.com/*"],
+      "js": ["content-script.js"],
+      "run_at": "document_start"
+    }
+  ]
+}
