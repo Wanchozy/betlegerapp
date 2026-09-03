@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Bet, buildDashboardData, getCurrentUserId } from '@betledger/shared'
 import { Dashboard } from '../components/Dashboard'
+import { PageHeader } from '../components/PageHeader'
+import { LoadingState } from '../components/LoadingState'
+import { ErrorBanner } from '../components/ErrorBanner'
 import { fetchBets, deleteBet } from '../api/bets'
 
 const userId = getCurrentUserId()
@@ -35,17 +38,21 @@ export function DashboardPage() {
     }
   }
 
-  if (loading) {
-    return <p className="text-center text-gray-400">Loading...</p>
-  }
+  return (
+    <div>
+      <PageHeader title="Dashboard" subtitle="Your betting performance at a glance" />
 
-  if (error) {
-    return (
-      <div className="rounded-lg border border-red-800 bg-red-900/20 p-4 text-red-400">
-        {error}
-      </div>
-    )
-  }
+      {error && (
+        <div className="mb-6">
+          <ErrorBanner message={error} />
+        </div>
+      )}
 
-  return <Dashboard data={buildDashboardData(bets)} onDeleteBet={handleDelete} />
+      {loading ? (
+        <LoadingState label="Loading your bets..." />
+      ) : (
+        <Dashboard data={buildDashboardData(bets)} onDeleteBet={handleDelete} />
+      )}
+    </div>
+  )
 }

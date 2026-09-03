@@ -19,16 +19,17 @@ describe('PNLSummary', () => {
     render(<PNLSummary summary={summary} title="This Week" />)
 
     expect(screen.getByText('This Week')).toBeInTheDocument()
-    expect(screen.getByText('$1000.00')).toBeInTheDocument()
     expect(screen.getByText('+$250.00')).toBeInTheDocument()
-    expect(screen.getByText('60.0%')).toBeInTheDocument()
-    expect(screen.getByText('25.0%')).toBeInTheDocument()
+    expect(screen.getByText('$1000.00')).toBeInTheDocument()
+    expect(screen.getByText('60.0% win rate')).toBeInTheDocument()
+    expect(screen.getByText('25.0% ROI')).toBeInTheDocument()
     expect(screen.getByText('6W')).toBeInTheDocument()
     expect(screen.getByText('3L')).toBeInTheDocument()
     expect(screen.getByText('1P')).toBeInTheDocument()
+    expect(screen.getByText(/10 bets/)).toBeInTheDocument()
   })
 
-  it('renders negative P&L without a leading plus sign', () => {
+  it('renders negative P&L with a leading minus sign', () => {
     render(
       <PNLSummary
         summary={{ ...summary, total_profit_loss: -50, roi: -0.05 }}
@@ -36,6 +37,6 @@ describe('PNLSummary', () => {
       />
     )
 
-    expect(screen.getByText('$-50.00')).toBeInTheDocument()
+    expect(screen.getByText('-$50.00')).toBeInTheDocument()
   })
 })

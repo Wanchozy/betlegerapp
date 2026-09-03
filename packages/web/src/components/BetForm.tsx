@@ -11,22 +11,32 @@ const betTypes: BetType[] = [
 
 const outcomes: BetOutcome[] = ['pending', 'win', 'loss', 'push']
 
+const inputClass =
+  'w-full rounded-xl border border-cream-200 bg-cream-50 px-3 py-2 text-sm text-ink outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100'
+
+const labelClass = 'mb-1 block text-xs font-medium text-gray-500'
+
+function defaultForm(): BetFormData {
+  return {
+    sport: 'NFL',
+    event: '',
+    bet_type: 'moneyline',
+    odds: 0,
+    stake: 0,
+    outcome: 'pending',
+    placed_at: new Date().toISOString().slice(0, 16),
+    notes: '',
+  }
+}
+
 interface Props {
   onSubmit: (data: BetFormData) => Promise<void>
   initial?: Partial<BetFormData>
+  submitLabel?: string
 }
 
-export function BetForm({ onSubmit, initial }: Props) {
-  const [form, setForm] = useState<BetFormData>({
-    sport: initial?.sport ?? 'NFL',
-    event: initial?.event ?? '',
-    bet_type: initial?.bet_type ?? 'moneyline',
-    odds: initial?.odds ?? 0,
-    stake: initial?.stake ?? 0,
-    outcome: initial?.outcome ?? 'pending',
-    placed_at: initial?.placed_at ?? new Date().toISOString().slice(0, 16),
-    notes: initial?.notes ?? '',
-  })
+export function BetForm({ onSubmit, initial, submitLabel }: Props) {
+  const [form, setForm] = useState<BetFormData>({ ...defaultForm(), ...initial })
   const [submitting, setSubmitting] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,33 +45,25 @@ export function BetForm({ onSubmit, initial }: Props) {
     try {
       await onSubmit(form)
       if (!initial) {
-        setForm({
-          sport: 'NFL',
-          event: '',
-          bet_type: 'moneyline',
-          odds: 0,
-          stake: 0,
-          outcome: 'pending',
-          placed_at: new Date().toISOString().slice(0, 16),
-          notes: '',
-        })
+        setForm(defaultForm())
       }
+    } catch {
+      // The parent surfaces the error; keep the form values so the user
+      // doesn't lose what they typed.
     } finally {
       setSubmitting(false)
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border border-gray-800 bg-gray-900 p-4">
-      <h2 className="text-lg font-semibold">{initial ? 'Edit Bet' : 'New Bet'}</h2>
-
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="mb-1 block text-sm text-gray-400">Sport</label>
+          <label className={labelClass}>Sport</label>
           <select
             value={form.sport}
             onChange={(e) => setForm({ ...form, sport: e.target.value as Sport })}
-            className="w-full rounded border border-gray-700 bg-gray-800 px-3 py-2 text-sm"
+            className={inputClass}
           >
             {sports.map((s) => (
               <option key={s} value={s}>{s}</option>
@@ -70,11 +72,11 @@ export function BetForm({ onSubmit, initial }: Props) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm text-gray-400">Bet Type</label>
+          <label className={labelClass}>Bet Type</label>
           <select
             value={form.bet_type}
             onChange={(e) => setForm({ ...form, bet_type: e.target.value as BetType })}
-            className="w-full rounded border border-gray-700 bg-gray-800 px-3 py-2 text-sm"
+            className={inputClass}
           >
             {betTypes.map((t) => (
               <option key={t} value={t}>{t}</option>
@@ -83,44 +85,44 @@ export function BetForm({ onSubmit, initial }: Props) {
         </div>
 
         <div className="col-span-2">
-          <label className="mb-1 block text-sm text-gray-400">Event</label>
+          <label className={labelClass}>Event</label>
           <input
             value={form.event}
             onChange={(e) => setForm({ ...form, event: e.target.value })}
             placeholder="e.g. Chiefs vs Eagles"
-            className="w-full rounded border border-gray-700 bg-gray-800 px-3 py-2 text-sm"
+            className={inputClass}
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-sm text-gray-400">Odds</label>
+          <label className={labelClass}>Odds</label>
           <input
             type="number"
             value={form.odds}
             onChange={(e) => setForm({ ...form, odds: Number(e.target.value) })}
             placeholder="e.g. -110"
-            className="w-full rounded border border-gray-700 bg-gray-800 px-3 py-2 text-sm"
+            className={inputClass}
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-sm text-gray-400">Stake ($)</label>
+          <label className={labelClass}>Stake ($)</label>
           <input
             type="number"
             step="0.01"
             value={form.stake}
             onChange={(e) => setForm({ ...form, stake: Number(e.target.value) })}
             placeholder="e.g. 100"
-            className="w-full rounded border border-gray-700 bg-gray-800 px-3 py-2 text-sm"
+            className={inputClass}
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-sm text-gray-400">Outcome</label>
+          <label className={labelClass}>Outcome</label>
           <select
             value={form.outcome}
             onChange={(e) => setForm({ ...form, outcome: e.target.value as BetOutcome })}
-            className="w-full rounded border border-gray-700 bg-gray-800 px-3 py-2 text-sm"
+            className={inputClass}
           >
             {outcomes.map((o) => (
               <option key={o} value={o}>{o}</option>
@@ -129,22 +131,22 @@ export function BetForm({ onSubmit, initial }: Props) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm text-gray-400">Date</label>
+          <label className={labelClass}>Date</label>
           <input
             type="datetime-local"
             value={form.placed_at}
             onChange={(e) => setForm({ ...form, placed_at: e.target.value })}
-            className="w-full rounded border border-gray-700 bg-gray-800 px-3 py-2 text-sm"
+            className={inputClass}
           />
         </div>
 
         <div className="col-span-2">
-          <label className="mb-1 block text-sm text-gray-400">Notes</label>
+          <label className={labelClass}>Notes</label>
           <input
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
             placeholder="Optional notes..."
-            className="w-full rounded border border-gray-700 bg-gray-800 px-3 py-2 text-sm"
+            className={inputClass}
           />
         </div>
       </div>
@@ -152,9 +154,9 @@ export function BetForm({ onSubmit, initial }: Props) {
       <button
         type="submit"
         disabled={submitting}
-        className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:opacity-50"
+        className="w-full rounded-full bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-600 disabled:opacity-50 sm:w-auto"
       >
-        {submitting ? 'Saving...' : initial ? 'Update Bet' : 'Add Bet'}
+        {submitting ? 'Saving...' : submitLabel ?? (initial ? 'Update Bet' : 'Add Bet')}
       </button>
     </form>
   )

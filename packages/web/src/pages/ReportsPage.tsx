@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Bet, aggregateByField, buildPeriodSummaries, getCurrentUserId } from '@betledger/shared'
-import { PNLSummary as PNLSummaryCard } from '../components/PNLSummary'
-import { fetchBets } from '../api/bets'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
+import { PNLSummary as PNLSummaryCard } from '../components/PNLSummary'
+import { BreakdownCard } from '../components/BreakdownCard'
+import { PageHeader } from '../components/PageHeader'
+import { LoadingState } from '../components/LoadingState'
+import { ErrorBanner } from '../components/ErrorBanner'
+import { fetchBets } from '../api/bets'
 
 const userId = getCurrentUserId()
 
@@ -16,7 +20,7 @@ export function ReportsPage() {
   useEffect(() => {
     fetchBets(userId)
       .then(setBets)
-      .catch((err) => setError(err.message))
+      .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load bets'))
       .finally(() => setLoading(false))
   }, [])
 
@@ -31,64 +35,54 @@ export function ReportsPage() {
   const bySport = aggregateByField(bets, 'sport')
   const byType = aggregateByField(bets, 'bet_type')
 
-  if (loading) return <p className="text-center text-gray-400">Loading...</p>
-  if (error) return <div className="rounded-lg border border-red-800 bg-red-900/20 p-3 text-sm text-red-400">{error}</div>
-
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {summaries.map((s) => (
-          <PNLSummaryCard key={s.key} summary={s.summary} title={s.label} />
-        ))}
-      </div>
+    <div>
+      <PageHeader title="Reports" subtitle="Analyze your betting performance over time" />
 
-      <div className="rounded-lg border border-gray-800 bg-gray-900 p-4">
-        <h3 className="mb-4 text-sm font-medium text-gray-400">P&L by Period</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-            <XAxis dataKey="period" stroke="#6b7280" />
-            <YAxis stroke="#6b7280" />
-            <Tooltip
-              contentStyle={{ background: '#111827', border: '1px solid #1f2937', borderRadius: 8 }}
-              labelStyle={{ color: '#9ca3af' }}
-            />
-            <Bar dataKey="P&L" fill="#10b981" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      {error && (
+        <div className="mb-6">
+          <ErrorBanner message={error} />
+        </div>
+      )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <BreakdownCard title="By Sport" data={bySport} />
-        <BreakdownCard title="By Bet Type" data={byType} />
-      </div>
-    </div>
-  )
-}
-
-function BreakdownCard({
-  title,
-  data,
-}: {
-  title: string
-  data: { label: string; count: number; profit: number }[]
-}) {
-  return (
-    <div className="rounded-lg border border-gray-800 bg-gray-900 p-4">
-      <h3 className="mb-3 text-sm font-medium text-gray-400">{title}</h3>
-      <div className="space-y-2">
-        {data.map((d) => (
-          <div key={d.label} className="flex items-center justify-between text-sm">
-            <span>
-              {d.label}{' '}
-              <span className="text-gray-500">({d.count})</span>
-            </span>
-            <span className={d.profit >= 0 ? 'text-green-400' : 'text-red-400'}>
-              {d.profit >= 0 ? '+' : ''}${d.profit.toFixed(2)}
-            </span>
+      {loading ? (
+        <LoadingState label="Crunching the numbers..." />
+      ) : (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {summaries.map((s, index) => (
+              <PNLSummaryCard key={s.key} summary={s.summary} title={s.label} index={index} />
+            ))}
           </div>
-        ))}
-      </div>
+
+          <div className="rounded-2xl border border-cream-200 bg-white p-5 shadow-sm">
+            <h3 className="mb-4 text-sm font-medium text-gray-500">P&L by Period</h3>
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e9e3d6" vertical={false} />
+                <XAxis dataKey="period" stroke="#9ca3af" tickLine={false} axisLine={false} fontSize={12} />
+                <YAxis stroke="#9ca3af" tickLine={false} axisLine={false} fontSize={12} />
+                <Tooltip
+                  cursor={{ fill: '#faf7f1' }}
+                  contentStyle={{
+                    background: '#ffffff',
+                    border: '1px solid #e9e3d6',
+                    borderRadius: 12,
+                    fontSize: 13,
+                  }}
+                  labelStyle={{ color: '#16241c', fontWeight: 600 }}
+                />
+                <Bar dataKey="P&L" fill="#10b981" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <BreakdownCard title="By Sport" data={bySport} index={0} />
+            <BreakdownCard title="By Bet Type" data={byType} index={1} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

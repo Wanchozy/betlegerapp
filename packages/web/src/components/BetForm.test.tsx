@@ -43,7 +43,7 @@ describe('BetForm', () => {
     expect(eventInput).toHaveValue('')
   })
 
-  it('shows an "Edit Bet" heading and label when editing an existing bet', () => {
+  it('shows an "Update Bet" label when editing an existing bet', () => {
     render(
       <BetForm
         onSubmit={vi.fn()}
@@ -51,7 +51,20 @@ describe('BetForm', () => {
       />
     )
 
-    expect(screen.getByText('Edit Bet')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Lakers vs Celtics')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /update bet/i })).toBeInTheDocument()
+  })
+
+  it('keeps the entered values when the submission fails', async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockRejectedValue(new Error('boom'))
+
+    render(<BetForm onSubmit={onSubmit} />)
+
+    const eventInput = screen.getByPlaceholderText(/chiefs vs eagles/i)
+    await user.type(eventInput, 'Lakers vs Celtics')
+    await user.click(screen.getByRole('button', { name: /add bet/i }))
+
+    expect(eventInput).toHaveValue('Lakers vs Celtics')
   })
 })
