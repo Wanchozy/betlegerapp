@@ -21,6 +21,12 @@ export interface CapturedRequest {
   requestBody: string | null
   responseBody: string | null
   timestamp: number
+  /**
+   * The page's origin (e.g. "https://www.sportybet.com") at capture time.
+   * Needed because many API calls use relative URLs (e.g. "/api/tz/..."),
+   * which don't otherwise reveal which site they came from.
+   */
+  pageOrigin: string
 }
 
 export interface CapturedRequestWindowMessage {

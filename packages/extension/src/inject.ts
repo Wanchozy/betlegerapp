@@ -11,9 +11,13 @@
  */
 import { CAPTURE_MESSAGE_SOURCE, capText, looksBetRelated, type CapturedRequest } from './messaging'
 
-function postCapture(capture: CapturedRequest) {
+function postCapture(capture: Omit<CapturedRequest, 'pageOrigin'>) {
   window.postMessage(
-    { source: CAPTURE_MESSAGE_SOURCE, type: 'BETLEDGER_CAPTURED_REQUEST', payload: capture },
+    {
+      source: CAPTURE_MESSAGE_SOURCE,
+      type: 'BETLEDGER_CAPTURED_REQUEST',
+      payload: { ...capture, pageOrigin: window.location.origin },
+    },
     window.location.origin
   )
 }

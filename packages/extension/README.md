@@ -4,17 +4,27 @@ Captures bets placed on supported sportsbooks and syncs them straight into
 your BetLedger Supabase database - no manual entry or CSV needed, once a
 site's adapter is finished.
 
-## Status: scaffold only, SportyBet adapter not finished yet
+## Status: SportyBet adapter is working, with one known limitation
 
-This extension is fully wired end-to-end (network capture -> background
-worker -> Supabase, via `@betledger/shared`), but nobody has taught it what a
-real SportyBet "place bet" request/response actually looks like yet. Until
-that's done, `sportybetAdapter` intentionally returns `null` for everything -
-**nothing gets written to your bets table from an unfinished adapter.**
+SportyBet encrypts its actual "place bet" call (`/api/tz/orders/order`), so
+that can't be read directly. Instead, the adapter reads the `cashAbleBet(s)`
+endpoints that power SportyBet's own "Open Bets"/cash-out UI, which return
+full bet details as plain JSON.
 
-Instead, every bet-related request the extension sees is logged locally so a
-real sample can be collected. That's what the "Debug log" section in the
-popup is for.
+**Practical effect:** a bet gets synced to BetLedger once you view "My
+Bets"/"Open Bets" after placing it (which most people do anyway to confirm
+the slip went through) - not necessarily the instant you click "place bet".
+
+Because that endpoint only ever returns *unsettled* bets, everything is
+recorded as `pending` for now - there's no capture point yet for when a bet
+settles as a win/loss (that needs whatever endpoint powers the settled "Bet
+History" tab, not yet captured). Stake is also stored as a raw number with no
+currency conversion, so non-USD accounts will show the right number in the
+wrong currency until that's added.
+
+Every bet-related request the extension sees is still logged locally (the
+popup's "Debug log"), which is how the adapter above was built and how
+future adapters/refinements can be too.
 
 ## How it works
 

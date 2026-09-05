@@ -8,7 +8,7 @@ interface DebugLogEntry {
   responseBody: string | null
   timestamp: number
   adapterMatched: string | null
-  betCreated: boolean
+  betsCreated: number
 }
 
 const statusEl = document.getElementById('status') as HTMLParagraphElement
@@ -39,7 +39,12 @@ async function render() {
   for (const entry of debugLog) {
     const li = document.createElement('li')
     const time = new Date(entry.timestamp).toLocaleTimeString()
-    const status = entry.betCreated ? 'saved' : entry.adapterMatched ? 'seen, not a bet' : 'unmatched'
+    const status =
+      entry.betsCreated > 0
+        ? `saved ${entry.betsCreated}`
+        : entry.adapterMatched
+          ? 'seen, no new bets'
+          : 'unmatched'
     li.textContent = `${time} - ${entry.method} ${entry.url} (${status})`
     logEl.appendChild(li)
   }

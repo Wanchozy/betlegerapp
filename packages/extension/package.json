@@ -8,7 +8,8 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@betledger/shared": "*"
+    "@betledger/shared": "*",
+    "@supabase/supabase-js": "^2.49.0"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.287",
